@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sample Map</title>
+
+    <!--leaflet css-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+     integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+     crossorigin=""/>
+
+     <style>
+        body{
+            margin: 0; 
+            padding: 0; 
+        }
+        #map{
+            width: 100%; 
+            height:100vh; 
+        }
+
+     </style>
+</head>
+<body>
+
+    <div id = "map"></div>
+    
+</body>
+</html>
+
+
+<!--leaflet js-->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+crossorigin=""></script>
+<script src="./data/line.js"></script>
+<script src="./data/points.js"></script>
+<script src="./data/polygon.js"></script>
+
+<script>
+
+    //Map initialization 
+
+  var map = L.map('map').setView([40.7128, -74.0060], 12);
+
+  //osm layer
+  var osm =   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+}); 
+
+osm.addTo(map); 
+
+//water color 
+var watercolor = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	subdomains: 'abcd',
+	minZoom: 1,
+	maxZoom: 16,
+	ext: 'jpg'
+});
+
+//watercolor.addTo(map); 
+
+//NatGeo
+
+var natGeoWorldMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+	maxZoom: 16
+});
+
+//natGeoWorldMap.addTo(map); 
+
+//worldImagery
+
+var worldImagery = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+});
+
+//worldImagery.addTo(map); 
+
+//google street 
+googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+
+//googleStreets. addTo(map); 
+
+//google satalitte 
+googleSat = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3']
+});
+
+//googleSat.addTo(map); 
+
+
+//Marker
+var myIcon = L.icon({
+    iconUrl: 'img/tree.png',
+    iconSize: [50, 50],
+
+    
+});
+
+var singleMarker = L.marker([40.7, -74.0], {icon:myIcon, draggable:true});
+var popup = singleMarker.bindPopup("This is New York" + singleMarker.getLatLng()). openPopup(); 
+popup.addTo(map); 
+
+//Layer controller 
+var baseMaps = {
+    "OSM": osm, 
+    "Water color map":watercolor, 
+    "Geo World Map":natGeoWorldMap, 
+    "World Imagery":worldImagery,
+    "Google Street":googleStreets, 
+    "Google Satellite":googleSat
+
+};
+
+var overlayMaps = {
+    "Marker":singleMarker
+};
+
+var layerControl = L.control.layers(baseMaps, overlayMaps, {collapsed: false}).addTo(map);
+
+var ourIcon = L.icon({
+    iconUrl: 'img/tree1.png', 
+    iconSize: [50, 50]
+}); 
+
+//GeoJson
+var points = L.geoJSON(pointsJson, {
+    pointToLayer : function(geoJsonPoint, latlng){
+        return L.marker(latlng, {icon:ourIcon}); 
+    }
+}
+).addTo(map); 
+
+/* Creating a popup for each coordinate. Struggling with this...
+
+
+var popUp = points.bindPopup("Hello").openPopup(); 
+popUp.addTo(map);
+*/
+L.geoJSON(linejson).addTo(map); 
+L.geoJSON(polygonjson, {
+    onEachFeature: function(feature, layer){
+        layer.bindPopup("<b>Name: </b>" + feature.properties.name); 
+    }
+}).addTo(map); 
+
+
+
+</script>
+
